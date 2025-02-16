@@ -1,40 +1,56 @@
-const { ticketsUsers } = require('../Data/databaseTicketsUsers.js')
-const connectDB = require('../Middlewares/db.js')
-const TicketUsers = require('../Models/Tickets-Users.js')
-const Users = require('../Models/Users.js')
+const TicketUser = require('../Models/TicketUser');
+const Ticket = require('../Models/Ticket');
+const connectDB = require('../Middlewares/db.js');
 
-connectDB()
+connectDB();
 
 const buyTickets = async (req, res) => {
-    const ticketName = req.body
+    const { name, total } = req.body;
+    const userId = req.user.id; 
 
     try {
-        let ticket = await TicketUsers.find({name: ticketName.name, idUser: ticketName.idUser});
-        if(!ticket){
-            await TicketUsers.insertOne ({name: ticket.name, idUser: ticket.idUser, total: ticket.total})
+        const ticket = await Ticket.findOne({ name });
+        if (!ticket) {
+            return res.status(404).json({ message: 'Ticket não encontrado' });
         }
-        else{
-            ticket.total += total
-            await TicketUsers.updateOne({name: ticket.name, idUser: ticket.idUser, total: ticket.total})
-        }
-        ticket.save()
-        res.json(ticket);
-    } catch (err) {
-        res.status(500).json({ message: 'Erro' });
-    }
-}
 
-const seeMyTickets = async (res) => {
-    try {
-        
-        const tickets = await TicketUsers.find({idUser: idUser});
-        res.json(tickets);
+        if (ticket.total < total) {
+            return res.status(400).json({ message: 'Quantidade de tickets insuficiente' });
+        }
+
+        let ticketUser = await TicketUser.findOne({ name, userId });
+        if (!ticketUser) {
+            ticketUser = await TicketUser.create({
+                name,
+                userId,
+                total
+            });
+        } else {
+            ticketUser.total += total;
+            await ticketUser.save();
+        }
+
+        ticket.total -= total;
+        await ticket.save();
+
+        res.status(200).json({ message: 'Tickets comprados com sucesso', ticketUser });
     } catch (err) {
-        res.status(500).json({ message: 'Erro' });
+        res.status(500).json({ message: 'Erro ao comprar tickets', error: err.message });
     }
-} 
+};
+
+const seeMyTickets = async (req, res) => {
+    const userId = req.user.id; 
+
+    try {
+        const tickets = await TicketUser.find({ userId });
+        res.status(200).json(tickets);
+    } catch (err) {
+        res.status(500).json({ message: 'Erro ao obter seus tickets', error: err.message });
+    }
+};
 
 module.exports = {
     buyTickets,
     seeMyTickets
-}
+};
