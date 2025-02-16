@@ -5,14 +5,8 @@ const User = require('../Models/Users.js')
 
 connectDB()
 
-
-//Função para criar usuário
 const createUser = async (req, res) => {
-
-    //Criação de variável com as informações passada pelo body
     const newUser =  req.body
-
-    //Se o body não conter name, email, user e password, será chamado o erro 400.
     if (!newUser.name || !newUser.email || !newUser.password) {
         return res.status(400).json({ message: 'Todos os campos são obrigatórios' });
     }
@@ -30,13 +24,10 @@ const createUser = async (req, res) => {
 }
 
 
-//Função para criar administrador
 const createUserAdm = async (req, res) => {
     
-    //Criação de variável com as informações passada pelo body
     const newUser =  req.body
 
-    //Se o body não conter name, email, user e password, será chamado o erro 400.
     if (!newUser.name || !newUser.email || !newUser.password) {
         return res.status(400).json({ message: 'Todos os campos são obrigatórios' });
     }
@@ -53,23 +44,16 @@ const createUserAdm = async (req, res) => {
     }
 }
 
-//Função de login que retorna um token
 const verifyUser = async(req, res) => {
-    //As informações de autenticação são passada pelo body
     const {email, password} = req.body
 
-    //Será procurado o usuário com o mesmo nome e senha no vetor
     const userLogin = User.find({email: email, password: password})
 
-    //Caso não encontre, retornará erro 401
     if(!userLogin) {
         return res.status(401).json({ message: 'Usuário ou senha inválida, tente novamente' });
     }
 
     else{
-        //Será gerado um jwt token que contém 2 informações, o ID do usuário e se ele é ADM
-        //Criptografia feita com a string atribuida do JWT_SECRET do arquivo .env
-        //O token terá validade de até 1 hora
         const token = jwt.sign({id: userLogin.id, isAdm: userLogin.isAdm}, process.env.JWT_SECRET, {expiresIn: '1 hr'})
         res.cookie("token", token, {httpOnly: true})
 
