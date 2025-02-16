@@ -14,7 +14,7 @@ const getTickets = async (res) => {
 }
 
 const getTicketByName = async (req, res) => {
-    const ticketName = parseInt(req.params.name)
+    const ticketName = req.params.name
     
     try {
         const tickets = await Ticket.find({name: ticketName});
@@ -33,15 +33,17 @@ const getTicketsSortPrice = async (res) => {
     }
 }
 
-const createTickets = async (name, price, total) => {
+const createTickets = async (req, res) => {
 
-    if (!name || !price || !total) {
+    const ticket = req.body
+
+    if (!ticket.name || !ticket.price || !ticket.total) {
         return res.status(400).json({ message: 'Todos os campos são obrigatórios ou os tipos de parâmetros estão incorretos' });
     }
 
     else{
         try{
-            const ticketCreated = await Ticket.insertOne ({name: name, price: price, total: total})
+            const ticketCreated = await Ticket.insertOne ({name: ticket.name, price: ticket.price, total: ticket.total})
             ticketCreated.save()
             res.status(200).json(ticketCreated)
         }
@@ -51,9 +53,10 @@ const createTickets = async (name, price, total) => {
     }
 }
 
-const updateTickets = async (name) => {
+const updateTickets = async (req, res) => {
+    const ticket = req.body
     try {
-        const ticketFound = await Ticket.find({name: name});
+        const ticketFound = await Ticket.find({name: ticket.name});
     } catch (err) {
         res.status(500).json({ message: 'Erro' });
     }
@@ -72,13 +75,15 @@ const updateTickets = async (name) => {
         }
     })
 
-    await Ticket.updateOne({name: ticketFound.name, price: ticketFound.price, total: ticketFound.total})
+    const ticketFound = await Ticket.updateOne({name: ticketFound.name, price: ticketFound.price, total: ticketFound.total})
+    ticketFound.save()
     res.status(200).json(ticketFound)
 }
 
-const deleteTickets = async (name) => {
+const deleteTickets = async (req,res) => {
+    const ticketName = req.body
     try {
-        const ticket = await Ticket.deleteOne({name: name});
+        const ticket = await Ticket.deleteOne({name: ticketName.name});
         res.status(200).json(ticket)
     } catch (err) {
         res.status(500).json({ message: 'Erro' });
