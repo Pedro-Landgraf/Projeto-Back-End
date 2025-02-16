@@ -1,25 +1,23 @@
-
 require('dotenv').config();
-const express = require('express')
-const connectDB = require('./Middlewares/db.js')
-const {urlNotValid} = require('./Middlewares/auth.js')
-const routes = require('./Routes/Routes.js')
+const express = require('express');
+const connectDB = require('./Middlewares/db.js');
+const routes = require('./Routes/Routes.js');
+const path = require('path');
+const mustacheExpress = require("mustache-express");
+const cookieParser = require('cookie-parser');
 
-var mustacheExpress = require("mustache-express");
+const app = express();
+
+// Configuração do mecanismo de visualização Mustache
 var engine = mustacheExpress();
 app.engine("mustache", engine);
-
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.join(__dirname, 'Views'));
 app.set('view engine', 'mustache');
 
-const app = express()
+// Middlewares
+app.use(express.json());
+app.use(cookieParser());
+connectDB();
+app.use('/', routes);
 
-app.use(express.json())
-
-connectDB()
-
-app.use('/', routes)
-
-app.use(urlNotValid)
-
-app.listen(4000, () => console.log("Servidor rodando na porta 4000"))
+app.listen(4000, () => console.log("Servidor rodando na porta 4000"));
