@@ -1,7 +1,6 @@
 const Ticket = require('../Models/Ticket');
 const connectDB = require('../Middlewares/db.js');
 
-// Conectar ao banco de dados
 connectDB();
 
 const getTickets = async (req, res) => {
@@ -62,7 +61,6 @@ const updateTickets = async (req, res) => {
             return res.status(404).json({ message: 'Ticket não encontrado' });
         }
 
-        // Atualizar apenas os campos permitidos
         const allowedFields = ['name', 'price', 'total'];
         allowedFields.forEach(field => {
             if (field in updateFields) {
