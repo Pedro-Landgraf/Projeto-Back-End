@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 
 const ticketUserSchema = new mongoose.Schema({
-    name: String,
-    userId: Number,
-    total: Number
-})
+    name: { type: String, required: true },
+    userId: { type: Number, required: true },
+    total: { type: Number, required: true }
+});
 
-module.exports = mongoose.model('Ticket-User', ticketUserSchema);
+module.exports = mongoose.model('TicketUser', ticketUserSchema);
