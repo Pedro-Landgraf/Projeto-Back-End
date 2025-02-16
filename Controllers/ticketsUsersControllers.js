@@ -6,7 +6,7 @@ connectDB();
 
 const buyTickets = async (req, res) => {
     const { name, total } = req.body;
-    const userId = req.user.id; 
+    const userId = req.user.id;
 
     try {
         const ticket = await Ticket.findOne({ name });
